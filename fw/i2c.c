@@ -1,6 +1,5 @@
 #include "i2c.h"
 #include "LPC8xx.h"
-#include "display.h"
 
 /* Initialize I2C peripheral as master at 100kHz */
 void i2c_initialize(void)

@@ -1,10 +1,7 @@
 #include "LPC8xx.h"
-#include "display.h"
 #include "i2c.h"
 #include "uart.h"
 #include "main.h"
-
-volatile uint8_t test_data[300];
 
 static inline void increment_time(void);
 static void gpio_int_initialize(void);
@@ -19,7 +16,15 @@ volatile char rx_buffer[32];
 
 int main(void)
 {
-    display_initialize();
+    // enable clock for gpio
+    LPC_SYSCON->SYSAHBCLKCTRL |= (1 << GPIO_CLK_EN);
+    // disable SWCLK function (bit 2) so PIO0_3 can be used as GPIO */
+    LPC_SWM->PINENABLE0 |= (1 << 2);
+    // set debug pin as output
+    LPC_GPIO_PORT->DIR0 |= (1 << DEBUG_PIN);
+    LPC_GPIO_PORT->SET0 |= (1 << DEBUG_PIN);
+
+    // display_initialize();
     uart_initialize();
     i2c_initialize();
 
@@ -28,7 +33,7 @@ int main(void)
     uart_print_esc(HOME_CURSOR);
 
     /* initialize pin interrupts */
-    gpio_int_initialize();
+    // gpio_int_initialize();
 
     /* initalize time */
     i2c_rtc_output_config();
@@ -56,7 +61,7 @@ int main(void)
             if (mode >= MODE_COUNT)
             {
                 mode = 0;
-                display_clear();
+                // display_clear();
             }
             else
             {
@@ -71,19 +76,7 @@ int main(void)
             {
                 /* normal time display */
                 case 1:
-                    display_time((rtc_time_t *)&time);
-                    break;
-
-                /* temperature display */
-                case 2:
-                    tmp_temp_t temp_c = i2c_tmp_get_temp(DEG_C);
-                    display_temp(&temp_c);
-                    break;
-
-                /* temperature display */
-                case 3:
-                    tmp_temp_t temp_f = i2c_tmp_get_temp(DEG_F);
-                    display_temp(&temp_f);
+                    // display_time((rtc_time_t *)&time);
                     break;
 
                 /* off */
@@ -101,7 +94,10 @@ int main(void)
 
 /* Enable external interrupts for gpio pins:
  *  - Rising edge PININT0 for PPS (PIO0_2)
- *  - Falling edge PININT1 for MODE (PIO0_1)
+ *  - Falling edge PININT1 for INPUT1 (PIO0_1)
+ *  - Falling edge PININT2 for INPUT2 (PIO0_15)
+ *  - Falling edge PININT3 for INPUT3 (PIO0_12)
+ *  - Falling edge PININT4 for INPUT4 (PIO0_5)
  */
 static void gpio_int_initialize(void)
 {
@@ -109,16 +105,16 @@ static void gpio_int_initialize(void)
     /* disable ACMP_I2 function (bit 1) so PIO0_1 can be used as GPIO */
     LPC_SWM->PINENABLE0 |= (1 << 3) | (1 << 1);
     /* set pins as inputs */
-    LPC_GPIO_PORT->DIR0 &= ~((1 << PPS_PIN) | (1 << MODE_PIN));
+    LPC_GPIO_PORT->DIR0 &= ~((1 << PPS_PIN) | (1 << INPUT1_PIN));
     /* set external interrupts */
     LPC_SYSCON->PINTSEL[PPS_IRQ] = PPS_PIN;
-    LPC_SYSCON->PINTSEL[MODE_IRQ] = MODE_PIN;
+    LPC_SYSCON->PINTSEL[INPUT1_IRQ] = INPUT1_PIN;
     /* set edge sensitive */
-    LPC_PIN_INT->ISEL &= ~((1 << PPS_IRQ) | (1 << MODE_IRQ));
+    LPC_PIN_INT->ISEL &= ~((1 << PPS_IRQ) | (1 << INPUT1_IRQ));
     /* PPS detect rising edge */
     LPC_PIN_INT->IENR |= (1 << PPS_IRQ);
     /* MODE detect falling edge */
-    LPC_PIN_INT->IENF |= (1 << MODE_IRQ);
+    LPC_PIN_INT->IENF |= (1 << INPUT1_IRQ);
     /* clear any pending/leftover flags */
     LPC_PIN_INT->IST = 0xFF;
     /* enable interrupts */
@@ -180,10 +176,10 @@ static int debounce(void)
 
     counter++;
     /* timeout */
-    if (counter > MODE_DEBOUNCE)
+    if (counter > DEBOUNCE_COUNT)
     {
         /* active low */
-        int press = !(LPC_GPIO_PORT->B0[MODE_PIN]);
+        int press = !(LPC_GPIO_PORT->B0[INPUT1_PIN]);
         counter = 0; 
         mode_flag = 0;
         return press;
@@ -209,10 +205,10 @@ void PININT0_IRQHandler(void)
 void PININT1_IRQHandler(void)
 {
     /* check interrupt flag and set mode flag */
-    if (LPC_PIN_INT->IST & (1 << MODE_IRQ))
+    if (LPC_PIN_INT->IST & (1 << INPUT1_IRQ))
     {
         mode_flag = 1;
-        LPC_PIN_INT->IST = (1 << MODE_IRQ);
+        LPC_PIN_INT->IST = (1 << INPUT1_IRQ);
     }
 }
 
