@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "LPC8xx.h"
 #include "main.h"
+#include "input.h"
 
 // External symbols defined in linker script
 extern uint32_t _estack;
@@ -45,9 +46,9 @@ const void *vector_table[] = {
     0, 0, 0, 0, 0, 0, 0, 0, // Reserved
     PININT0_IRQHandler,     // PININT0
     PININT1_IRQHandler,     // PININT1
-    Default_Handler,        // PININT2
-    Default_Handler,        // PININT3
-    Default_Handler,        // PININT4
+    PININT2_IRQHandler,     // PININT2
+    PININT3_IRQHandler,     // PININT3
+    PININT4_IRQHandler,     // PININT4
     Default_Handler,        // PININT5
     Default_Handler,        // PININT6
     Default_Handler         // PININT7
