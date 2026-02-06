@@ -7,7 +7,7 @@
 #define DEBUG_PIN 3
 
 /* Pulse per second */
-#define PPS_PIN 10
+#define PPS_PIN 16
 #define PPS_IRQ 0    /* PININT0_IRQ */
 
 /* X */

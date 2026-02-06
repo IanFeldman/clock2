@@ -44,7 +44,8 @@ int main(void)
         /* service 1hz pps */
         if (pps_flag)
         {
-            increment_time();
+            input_toggle_debug();
+            pps_flag = 0;
         }
     }
 

@@ -51,8 +51,8 @@ void input_initialize(void)
     /* enable interrupts */
     NVIC_EnableIRQ(PININT0_IRQn);
     NVIC_EnableIRQ(PININT1_IRQn);
-    NVIC_EnableIRQ(PININT2_IRQn);
     /* TODO: enable remaining interrupts */
+    // NVIC_EnableIRQ(PININT2_IRQn);
     // NVIC_EnableIRQ(PININT3_IRQn);
     // NVIC_EnableIRQ(PININT4_IRQn);
 }
@@ -117,7 +117,7 @@ void input_interrupt_handler(int irq)
     {
         switch(irq)
         {
-            case PPS_PIN:
+            case PPS_IRQ:
                 pps_flag = 1;
                 break;
             case INPUT1_IRQ:
