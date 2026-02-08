@@ -20,10 +20,11 @@
 #define XLATCH_PIN 13
 #define BLANK_PIN 14
 
-#define LATCH_DELAY_COUNT 100
+#define LATCH_DELAY_COUNT 10000
 #define SEGMENT_LED_COUNT 24
 
 void display_initialize(void);
+void display_write_segment(uint32_t data, uint16_t brightness);
 
 #endif /* DISPLAY_H */
 

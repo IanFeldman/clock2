@@ -1,9 +1,7 @@
 #include "LPC8xx.h"
 #include "display.h"
-#include "uart.h"
 
 static void display_delay(void);
-static void display_write_segment(uint32_t data, uint16_t brightness);
 
 /* Setup output pins and spi pins */
 void display_initialize(void)
@@ -14,6 +12,10 @@ void display_initialize(void)
     /* configure latch and blank as outputs, low by default */
     LPC_GPIO_PORT->DIR0 |= (1 << XLATCH_PIN)  | (1 << BLANK_PIN);
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN)  | (1 << BLANK_PIN);
+    /* toggle blank */
+    LPC_GPIO_PORT->SET0 |= (1 << BLANK_PIN);
+    display_delay();
+    LPC_GPIO_PORT->CLR0 |= (1 << BLANK_PIN);
 
     /* enable clock for spi0 */
     LPC_SYSCON->SYSAHBCLKCTRL |= (1 << SPI_CLK_EN);
@@ -37,8 +39,6 @@ void display_initialize(void)
 
     /* set config: enabled as master */
     LPC_SPI0->CFG = (1 << SPI_EN) | (1 << SPI_MSTEN);
-
-    display_write_segment(0x00FFFFFF, 0x0000);
 }
 
 
@@ -51,24 +51,28 @@ static void display_delay(void)
 
 /* Write a single segment of 24 leds all at the same brightness */
 /* Data = 24 bits, brightness = 12 bits */
-static void display_write_segment(uint32_t data, uint16_t brightness)
+void display_write_segment(uint32_t data, uint16_t brightness)
 {
     /* for each led */
     for (int i = 0; i < SEGMENT_LED_COUNT; i++)
     {
+        uint16_t data = 0x0000;
         /* if led is on */
         if (data & (1 << i))
         {
-            /* wait for tx ready */
-            while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
-            LPC_SPI0->TXDAT = brightness;
+            data = brightness;
         }
+
+        /* wait for tx ready */
+        while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
+        LPC_SPI0->TXDAT = brightness;
     }
 
     /* wait for tx ready and transmission complete */
     while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
 
     /* toggle latch */
+    display_delay();
     LPC_GPIO_PORT->SET0 |= (1 << XLATCH_PIN);
     display_delay();
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
