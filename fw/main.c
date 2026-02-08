@@ -1,8 +1,9 @@
 #include "LPC8xx.h"
+#include "display.h"
 #include "input.h"
 #include "i2c.h"
-#include "uart.h"
 #include "main.h"
+#include "uart.h"
 
 static void increment_time(void);
 
@@ -16,6 +17,7 @@ int main(void)
     input_initialize();
     uart_initialize();
     i2c_initialize();
+    display_initialize();
 
     /* reset terminal */
     uart_print_esc(CLEAR_SCREEN);
