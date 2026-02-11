@@ -27,8 +27,6 @@ int main(void)
     i2c_rtc_output_config();
     i2c_rtc_set_time(time);
 
-    uint16_t brightness = 0;
-
     while (1)
     {
         /* check incoming message */
@@ -42,16 +40,14 @@ int main(void)
         /* check inputs */
         if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
         {
-            input_toggle_debug();
+            seg test[6] = {EMPTY, A, B, C, EMPTY, A};
+            display_write(test, 512);
         }
 
         /* service 1hz pps */
         if (pps_flag)
         {
             input_toggle_debug();
-            display_write_segment(0x00FFFFFF, brightness);
-            brightness += 100;
-            if (brightness > 0x0FFF) brightness = 0;
             pps_flag = 0;
         }
     }

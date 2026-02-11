@@ -2,6 +2,7 @@
 #include "display.h"
 
 static void display_delay(void);
+static void display_write_data(uint32_t data, uint16_t brightness);
 
 /* Setup output pins and spi pins */
 void display_initialize(void)
@@ -12,10 +13,8 @@ void display_initialize(void)
     /* configure latch and blank as outputs, low by default */
     LPC_GPIO_PORT->DIR0 |= (1 << XLATCH_PIN)  | (1 << BLANK_PIN);
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN)  | (1 << BLANK_PIN);
-    /* toggle blank */
+    /* set blank high */
     LPC_GPIO_PORT->SET0 |= (1 << BLANK_PIN);
-    display_delay();
-    LPC_GPIO_PORT->CLR0 |= (1 << BLANK_PIN);
 
     /* enable clock for spi0 */
     LPC_SYSCON->SYSAHBCLKCTRL |= (1 << SPI_CLK_EN);
@@ -39,6 +38,11 @@ void display_initialize(void)
 
     /* set config: enabled as master */
     LPC_SPI0->CFG = (1 << SPI_EN) | (1 << SPI_MSTEN);
+
+    seg clear[6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
+    display_write(clear, 0x0000);
+    /* set blank low */
+    LPC_GPIO_PORT->CLR0 |= (1 << BLANK_PIN);
 }
 
 
@@ -50,26 +54,38 @@ static void display_delay(void)
 
 
 /* Write a single segment of 24 leds all at the same brightness */
-/* Data = 24 bits, brightness = 12 bits */
-void display_write_segment(uint32_t data, uint16_t brightness)
+/* data = 24 bits, brightness = 12 bits */
+static void display_write_data(uint32_t data, uint16_t brightness)
 {
     /* for each led */
     for (int i = 0; i < SEGMENT_LED_COUNT; i++)
     {
-        uint16_t data = 0x0000;
+        uint16_t write_val = 0x0000;
         /* if led is on */
         if (data & (1 << i))
         {
-            data = brightness;
+            write_val = brightness;
         }
 
         /* wait for tx ready */
         while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
-        LPC_SPI0->TXDAT = brightness;
+        LPC_SPI0->TXDAT = write_val;
     }
 
     /* wait for tx ready and transmission complete */
     while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
+
+}
+
+
+/* Write to all 6 segments with the same brightness */
+void display_write(seg *segments, uint16_t brightness)
+{
+    for (int i = SEGMENT_COUNT - 1; i >= 0; i--)
+    {
+        uint32_t data = seg_to_dat[segments[i]];
+        display_write_data(data, brightness);
+    }
 
     /* toggle latch */
     display_delay();
@@ -77,4 +93,5 @@ void display_write_segment(uint32_t data, uint16_t brightness)
     display_delay();
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
 }
+
 
