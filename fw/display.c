@@ -79,7 +79,7 @@ static void display_write_data(uint32_t data, uint16_t brightness)
 
 
 /* Write to all 6 segments with the same brightness */
-void display_write(seg *segments, uint16_t brightness)
+void display_write(uint8_t *segments, uint16_t brightness)
 {
     for (int i = SEGMENT_COUNT - 1; i >= 0; i--)
     {
