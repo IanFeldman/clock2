@@ -32,7 +32,8 @@ int main(void)
     seg test_2[6] = {G, H, I, J, K, L};
     seg test_3[6] = {M, N, O, P, Q, R};
     seg test_4[6] = {S, T, U, V, W, X};
-    seg test_5[6] = {Y, Z, EMPTY, EMPTY, EMPTY, EMPTY};
+    seg test_5[6] = {Y, Z, _0, _1, _2, _3};
+    seg test_6[6] = {_4, _5, _6, _7, _8, _9};
 
     while (1)
     {
@@ -63,10 +64,13 @@ int main(void)
                 case 4:
                     display_write(test_5, 256);
                     break;
+                case 5:
+                    display_write(test_6, 256);
+                    break;
                 default:
                     break;
             }
-            if (++x > 4) {
+            if (++x > 5) {
                 x = 0;
             }
         }

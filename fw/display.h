@@ -28,7 +28,8 @@ typedef enum
 {
     EMPTY = 0, A, B, C, D, E, F, G,
     H, I, J, K, L, M, N, O, P, Q, R,
-    S, T, U, V, W, X, Y, Z
+    S, T, U, V, W, X, Y, Z, _0, _1, _2,
+    _3, _4, _5, _6, _7, _8, _9
 } seg;
 
 static const uint32_t seg_to_dat[] =
@@ -60,6 +61,16 @@ static const uint32_t seg_to_dat[] =
     0x00996699, /* X */
     0x00999622, /* Y */
     0x00F8421F, /* Z */
+    0x0069BD96, /* 0 */
+    0x00622227, /* 1 */
+    0x0069248F, /* 2 */
+    0x00E1611E, /* 3 */
+    0x00997111, /* 4 */
+    0x00F8E196, /* 5 */
+    0x0078E996, /* 6 */
+    0x00F12222, /* 7 */
+    0x00696996, /* 8 */
+    0x00E9F111, /* 9 */
 };
 
 void display_initialize(void);
