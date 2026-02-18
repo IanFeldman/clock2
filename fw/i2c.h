@@ -38,7 +38,7 @@ typedef struct {
     uint8_t minutes_ones;
     uint8_t seconds_tens;
     uint8_t seconds_ones;
-} rtc_time_t;
+} rtc_time;
 
 typedef struct {
     uint8_t deg_tens;
@@ -47,7 +47,7 @@ typedef struct {
     uint8_t deg_hundredths;
     uint8_t deg_symbol;
     uint8_t deg_unit;
-} tmp_temp_t;
+} tmp_temp;
 
 void i2c_initialize(void);
 void i2c_tx(uint8_t chip_addr, uint8_t addr, uint8_t *data, int size);
@@ -55,12 +55,12 @@ void i2c_rx(uint8_t chip_addr, uint8_t addr, uint8_t *data, int size);
 
 /* rtc functions */
 void i2c_rtc_output_config(void);
-rtc_time_t i2c_rtc_get_time(void);
-void i2c_rtc_set_time(rtc_time_t time);
+rtc_time i2c_rtc_get_time(void);
+void i2c_rtc_set_time(rtc_time time);
 
 /* tmp functions */
 void i2c_tmp_output_config(void);
-tmp_temp_t i2c_tmp_get_temp(int unit);
+tmp_temp i2c_tmp_get_temp(int unit);
 
 #endif /* I2C_H */
 

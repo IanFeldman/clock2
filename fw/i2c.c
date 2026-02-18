@@ -117,7 +117,7 @@ void i2c_rtc_output_config(void)
 
 
 /* Set RTC time, 24-hour mode, oscillator enabled */
-void i2c_rtc_set_time(rtc_time_t time)
+void i2c_rtc_set_time(rtc_time time)
 {
     uint8_t hours_data =
         (time.hours_ones & 0x0F) | (time.hours_tens << 4);
@@ -136,9 +136,9 @@ void i2c_rtc_set_time(rtc_time_t time)
 
 
 /* Get current seconds, minutes, hours from RTC */
-rtc_time_t i2c_rtc_get_time(void)
+rtc_time i2c_rtc_get_time(void)
 {
-    rtc_time_t time;
+    rtc_time time;
 
     /* get seconds */
     uint8_t seconds_data;
@@ -177,7 +177,7 @@ void i2c_tmp_output_config(void)
 
 
 /* Get temperature and display it */
-tmp_temp_t i2c_tmp_get_temp(int unit)
+tmp_temp i2c_tmp_get_temp(int unit)
 {
     /* read temp register */
     uint8_t temp_raw[2];
@@ -200,7 +200,7 @@ tmp_temp_t i2c_tmp_get_temp(int unit)
     }
 
     /* abcd */
-    tmp_temp_t temp;
+    tmp_temp temp;
     temp.deg_tens = temp_m / 1000;
     temp_m -= (temp.deg_tens * 1000);
     /* bcd */

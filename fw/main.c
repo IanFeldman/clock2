@@ -8,7 +8,7 @@
 static void increment_time(void);
 
 /* isr variables */
-volatile rtc_time_t time = { 0, 0, 0, 0, 0 };
+volatile rtc_time time = { 0, 0, 0, 0, 0 };
 volatile int rx_flag = 0;
 volatile char rx_buffer[32];
 
@@ -32,7 +32,7 @@ int main(void)
         /* check incoming message */
         if (rx_flag)
         {
-            uart_handle_message((char *)rx_buffer, (rtc_time_t *)&time);
+            uart_handle_message((char *)rx_buffer, (rtc_time *)&time);
             i2c_rtc_set_time(time);
             rx_flag = 0;
         }
@@ -49,7 +49,7 @@ int main(void)
             increment_time();
             display_write((seg *)&time, 8);
             /*
-            tmp_temp_t temp_f = i2c_tmp_get_temp(DEG_F);
+            tmp_temp temp_f = i2c_tmp_get_temp(DEG_F);
             display_write((seg *)&temp_f, 32);
             */
             pps_flag = 0;

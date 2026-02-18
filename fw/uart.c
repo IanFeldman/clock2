@@ -89,10 +89,10 @@ void uart_print_hex(char val)
 }
 
 
-/* Convert message payload to bcd and store in rtc_time_t
+/* Convert message payload to bcd and store in rtc_time
  * Todo: Add rtc_date_t
  */
-void uart_handle_message(char *msg, rtc_time_t *time)
+void uart_handle_message(char *msg, rtc_time *time)
 {
     clk_set_msg_t clk_set;
     memcpy(&clk_set, (void *)msg + sizeof(UART_RX_SYNC), sizeof(clk_set));

@@ -42,7 +42,7 @@ void uart_print_ln(char *str);
 void uart_print_esc(char *code);
 void uart_print_char(char c);
 void uart_print_hex(char val);
-void uart_handle_message(char *msg, rtc_time_t *time);
+void uart_handle_message(char *msg, rtc_time *time);
 
 #endif /* UART_H */
 
