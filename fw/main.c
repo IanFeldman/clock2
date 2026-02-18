@@ -27,6 +27,13 @@ int main(void)
     i2c_rtc_output_config();
     i2c_rtc_set_time(time);
 
+    int x = 0;
+    seg test_1[6] = {A, B, C, D, E, F};
+    seg test_2[6] = {G, H, I, J, K, L};
+    seg test_3[6] = {M, N, O, P, Q, R};
+    seg test_4[6] = {S, T, U, V, W, X};
+    seg test_5[6] = {Y, Z, EMPTY, EMPTY, EMPTY, EMPTY};
+
     while (1)
     {
         /* check incoming message */
@@ -40,8 +47,28 @@ int main(void)
         /* check inputs */
         if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
         {
-            seg test[6] = {EMPTY, A, B, C, EMPTY, A};
-            display_write(test, 512);
+            switch(x) {
+                case 0:
+                    display_write(test_1, 256);
+                    break;
+                case 1:
+                    display_write(test_2, 256);
+                    break;
+                case 2:
+                    display_write(test_3, 256);
+                    break;
+                case 3:
+                    display_write(test_4, 256);
+                    break;
+                case 4:
+                    display_write(test_5, 256);
+                    break;
+                default:
+                    break;
+            }
+            if (++x > 4) {
+                x = 0;
+            }
         }
 
         /* service 1hz pps */
