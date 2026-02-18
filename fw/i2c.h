@@ -28,8 +28,8 @@
 #define TMP_CNFG_ADDR 0x01
 #define TMP_TEMP_ADDR 0x05
 #define TMP_RES_ADDR 0x08
-#define DEG_C 13
-#define DEG_F 12
+#define DEG_C C
+#define DEG_F F
 
 typedef struct {
     uint8_t hours_tens;
@@ -45,7 +45,8 @@ typedef struct {
     uint8_t deg_ones;
     uint8_t deg_tenths;
     uint8_t deg_hundredths;
-    uint8_t deg_unit; /* 13 = C, 12 = F */
+    uint8_t deg_symbol;
+    uint8_t deg_unit;
 } tmp_temp_t;
 
 void i2c_initialize(void);

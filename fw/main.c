@@ -47,7 +47,11 @@ int main(void)
         {
             input_toggle_debug();
             increment_time();
-            display_write((seg *)&time, 1024);
+            display_write((seg *)&time, 8);
+            /*
+            tmp_temp_t temp_f = i2c_tmp_get_temp(DEG_F);
+            display_write((seg *)&temp_f, 32);
+            */
             pps_flag = 0;
         }
     }

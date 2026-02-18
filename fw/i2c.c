@@ -1,5 +1,6 @@
 #include "i2c.h"
 #include "LPC8xx.h"
+#include "display.h"
 
 /* Initialize I2C peripheral as master at 100kHz */
 void i2c_initialize(void)
@@ -211,6 +212,7 @@ tmp_temp_t i2c_tmp_get_temp(int unit)
     /* d */
     temp.deg_hundredths = temp_m;
     /* celcius */
+    temp.deg_symbol = DEG;
     temp.deg_unit = unit;
     return temp;
 }

@@ -29,7 +29,7 @@ typedef enum
     _0 = 0, _1, _2, _3, _4, _5, _6,
     _7, _8, _9, A, B, C, D, E, F, G,
     H, I, J, K, L, M, N, O, P, Q, R,
-    S, T, U, V, W, X, Y, Z, EMPTY
+    S, T, U, V, W, X, Y, Z, DEG, EMPTY
 } seg;
 
 static const uint32_t seg_to_dat[] =
@@ -70,6 +70,7 @@ static const uint32_t seg_to_dat[] =
     0x00996699, /* X */
     0x00999622, /* Y */
     0x00F8421F, /* Z */
+    0x00757000, /* DEG */
     0x00000000  /* EMPTY */
 };
 
