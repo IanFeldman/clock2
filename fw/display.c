@@ -29,8 +29,8 @@ void display_initialize(void)
     LPC_SWM->PINASSIGN4 = reg4 | (LED_DATA_PIN << MOSI_EN_POS);
 
     /* clock speed */
-    /* 48 MHz / 480 = 100KHz */
-    LPC_SPI0->DIV = 480;
+    /* 48 MHz / 48 = 1MHz */
+    LPC_SPI0->DIV = 48;
 
     /* set tx length, disable slave sel, ignore rx */
     LPC_SPI0->TXCTRL = (1 << SPI_TXSSEL_N) | (SPI_TXLEN << SPI_TXLEN_POS) |
@@ -93,5 +93,4 @@ void display_write(seg *segments, uint16_t brightness)
     display_delay();
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
 }
-
 
