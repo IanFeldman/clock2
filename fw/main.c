@@ -27,6 +27,15 @@ int main(void)
     i2c_rtc_output_config();
     i2c_rtc_set_time(time);
 
+    /* initialize temp */
+    i2c_tmp_output_config();
+
+    /* initialize light */
+    i2c_light_output_config();
+
+    /* delay before starting program */
+    for (int i = 0; i < 100000; i++);
+
     while (1)
     {
         /* check incoming message */
@@ -47,7 +56,8 @@ int main(void)
         {
             input_toggle_debug();
             increment_time();
-            display_write((seg *)&time, 8);
+            uint16_t light = i2c_light_get_als();
+            display_write((seg *)&time, light);
             /*
             tmp_temp temp_f = i2c_tmp_get_temp(DEG_F);
             display_write((seg *)&temp_f, 32);

@@ -217,3 +217,22 @@ tmp_temp i2c_tmp_get_temp(int unit)
     return temp;
 }
 
+
+/* Set light sensitivity and power configuration */
+void i2c_light_output_config(void)
+{
+    uint16_t config = 0x0000;
+    i2c_tx(LIGHT_CHIP_ADDR, LIGHT_CNFG_ADDR, (uint8_t *)&config, sizeof(config));
+}
+
+
+/* Get temperature and display it */
+uint16_t i2c_light_get_als(void)
+{
+    /* read light register */
+    uint16_t light;
+    i2c_rx(LIGHT_CHIP_ADDR, LIGHT_RES_ADDR, (uint8_t *)&light, sizeof(light));
+    /* convert to 12 bit */
+    return light >> 4;
+}
+

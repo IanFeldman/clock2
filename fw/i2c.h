@@ -31,6 +31,13 @@
 #define DEG_C C
 #define DEG_F F
 
+/* Light sensor */
+#define LIGHT_CHIP_ADDR 0x20
+#define LIGHT_CNFG_ADDR 0x00
+#define LIGHT_PSM_ADDR 0x03
+#define LIGHT_RES_ADDR 0x04
+#define LIGHT_ID_ADDR 0x07
+
 typedef struct {
     uint8_t hours_tens;
     uint8_t hours_ones;
@@ -61,6 +68,10 @@ void i2c_rtc_set_time(rtc_time time);
 /* tmp functions */
 void i2c_tmp_output_config(void);
 tmp_temp i2c_tmp_get_temp(int unit);
+
+/* light functions */
+void i2c_light_output_config(void);
+uint16_t i2c_light_get_als(void);
 
 #endif /* I2C_H */
 
