@@ -1,4 +1,5 @@
 #include "LPC8xx.h"
+#include "main.h"
 #include "input.h"
 
 /* global interrupt flags */
@@ -118,6 +119,7 @@ void input_interrupt_handler(int irq)
         switch(irq)
         {
             case PPS_IRQ:
+                increment_time();
                 pps_flag = 1;
                 break;
             case INPUT1_IRQ:

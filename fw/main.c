@@ -5,8 +5,6 @@
 #include "main.h"
 #include "uart.h"
 
-static void increment_time(void);
-
 /* isr variables */
 volatile rtc_time time = { 0, 0, 0, 0, 0 };
 volatile int rx_flag = 0;
@@ -23,6 +21,9 @@ int main(void)
     uart_print_esc(CLEAR_SCREEN);
     uart_print_esc(HOME_CURSOR);
 
+    /* initialize light sensor */
+    i2c_light_output_config();
+
     /* initalize time */
     i2c_rtc_output_config();
     i2c_rtc_set_time(time);
@@ -30,11 +31,10 @@ int main(void)
     /* initialize temp */
     i2c_tmp_output_config();
 
-    /* initialize light */
-    i2c_light_output_config();
-
     /* delay before starting program */
     for (int i = 0; i < 100000; i++);
+
+    clock_mode mode = TIME;
 
     while (1)
     {
@@ -49,19 +49,38 @@ int main(void)
         /* check inputs */
         if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
         {
+            if (mode == TEMP)
+            {
+                mode = TIME;
+            }
+            else
+            {
+                mode++;
+            }
+            pps_flag = 1;
         }
 
         /* service 1hz pps */
         if (pps_flag)
         {
-            input_toggle_debug();
-            increment_time();
+            //input_toggle_debug();
             uint16_t light = i2c_light_get_als();
-            display_write((seg *)&time, light);
-            /*
-            tmp_temp temp_f = i2c_tmp_get_temp(DEG_F);
-            display_write((seg *)&temp_f, 32);
-            */
+            switch(mode)
+            {
+                case TIME:
+                {
+                    display_write((seg *)&time, light);
+                    break;
+                }
+                case TEMP:
+                {
+                    tmp_temp temp_f = i2c_tmp_get_temp(DEG_F);
+                    display_write((seg *)&temp_f, light);
+                    break;
+                }
+                default:
+                    break;
+            }
             pps_flag = 0;
         }
     }
@@ -71,7 +90,7 @@ int main(void)
 
 
 /* Increment current time by one second */
-static void increment_time(void)
+void increment_time(void)
 {
     time.seconds_ones++;
     /* check seconds */

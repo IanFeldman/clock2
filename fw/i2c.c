@@ -222,6 +222,7 @@ tmp_temp i2c_tmp_get_temp(int unit)
 void i2c_light_output_config(void)
 {
     uint16_t config = 0x0000;
+    i2c_tx(LIGHT_CHIP_ADDR, LIGHT_PSM_ADDR, (uint8_t *)&config, sizeof(config));
     i2c_tx(LIGHT_CHIP_ADDR, LIGHT_CNFG_ADDR, (uint8_t *)&config, sizeof(config));
 }
 
