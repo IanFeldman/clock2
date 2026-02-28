@@ -23,6 +23,8 @@
 #define LATCH_DELAY_COUNT 10000
 #define SEGMENT_LED_COUNT 24
 #define SEGMENT_COUNT 6
+#define SEGMENT_COLUMN_COUNT 4
+#define SEGMENT_ROW_COUNT 6
 
 typedef enum
 {
@@ -76,6 +78,7 @@ static const uint32_t seg_to_dat[] =
 
 void display_initialize(void);
 void display_write(uint8_t *segments, uint16_t brightness);
+void display_wave(void);
 
 #endif /* DISPLAY_H */
 

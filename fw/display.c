@@ -1,5 +1,6 @@
 #include "LPC8xx.h"
 #include "display.h"
+#include "util.h"
 
 static void display_delay(void);
 static void display_write_data(uint32_t data, uint16_t brightness);
@@ -92,5 +93,68 @@ void display_write(uint8_t *segments, uint16_t brightness)
     LPC_GPIO_PORT->SET0 |= (1 << XLATCH_PIN);
     display_delay();
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
+}
+
+
+/* Write scrolling sine wave to display */
+void display_wave(void)
+{
+    /* current sine index */
+    static int sine_idx = 0;
+    /* amount each column index is offset by */
+    const int column_idx_offset = 2;
+    /* amount of bits to decrease overall brightness by */
+    const int brightness_shift = 5;
+    /* amount to add to overall brightness */
+    const int brightness_adder = 4;
+
+    /* track index for each column */
+    int column_sine_idx = sine_idx;
+
+    /* iterate over each segment (right to left) */
+    for (int i = 0; i < SEGMENT_COUNT; i++)
+    {
+        /* track brightness of each column */
+        uint16_t col_data[SEGMENT_COLUMN_COUNT];
+
+        /* iterate over each column (right to left) */
+        for (int j = 0; j < SEGMENT_COLUMN_COUNT; j++)
+        {
+            /* set brightness of this column */
+            column_sine_idx += column_idx_offset;
+            if (column_sine_idx >= SINE_LUT_SIZE)
+            {
+                column_sine_idx -= SINE_LUT_SIZE;
+            }
+            /* store brightness */
+            col_data[j] =
+                (sine_lut[column_sine_idx] >> brightness_shift) + brightness_adder;
+        }
+
+        /* write brightness for this segment */
+        for (int k = 0; k < SEGMENT_ROW_COUNT; k++)
+        {
+            for (int l = 0; l < SEGMENT_COLUMN_COUNT; l++)
+            {
+                while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
+                LPC_SPI0->TXDAT = col_data[l];
+            }
+        }
+    }
+
+    /* toggle latch to update display */
+    /* wait for tx ready and transmission complete */
+    while (!(LPC_SPI0->STAT & (1 << SPI_TXRDY)));
+    display_delay();
+    LPC_GPIO_PORT->SET0 |= (1 << XLATCH_PIN);
+    display_delay();
+    LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
+
+    /* increment sine index */
+    sine_idx += column_idx_offset;
+    if (sine_idx >= SINE_LUT_SIZE)
+    {
+        sine_idx = 0;
+    }
 }
 

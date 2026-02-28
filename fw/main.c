@@ -8,7 +8,7 @@
 /* isr variables */
 volatile rtc_time time = { 0, 0, 0, 0, 0 };
 volatile int rx_flag = 0;
-volatile char rx_buffer[32];
+volatile char rx_buffer[RX_BUFFER_SIZE];
 
 int main(void)
 {
@@ -32,7 +32,7 @@ int main(void)
     i2c_tmp_output_config();
 
     /* delay before starting program */
-    for (int i = 0; i < 100000; i++);
+    for (int i = 0; i < STARTUP_DELAY; i++);
 
     clock_mode mode = TIME;
 
@@ -49,33 +49,40 @@ int main(void)
         /* check inputs */
         if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
         {
-            if (mode == TEMP)
+            if (++mode > WAVE)
             {
                 mode = TIME;
             }
-            else
-            {
-                mode++;
-            }
             pps_flag = 1;
+            input_toggle_debug();
         }
 
         /* service 1hz pps */
-        if (pps_flag)
+        if (pps_flag || mode == WAVE)
         {
-            //input_toggle_debug();
-            uint16_t light = i2c_light_get_als();
             switch(mode)
             {
                 case TIME:
                 {
+                    uint16_t light = i2c_light_get_als();
                     display_write((seg *)&time, light);
                     break;
                 }
                 case TEMP:
                 {
+                    uint16_t light = i2c_light_get_als();
                     tmp_temp temp_f = i2c_tmp_get_temp(DEG_F);
                     display_write((seg *)&temp_f, light);
+                    break;
+                }
+                case WAVE:
+                {
+                    /* update wave animation every WAVE_PERIOD loops */
+                    static int cnt = 0;
+                    if (++cnt > WAVE_PERIOD) {
+                        display_wave();
+                        cnt = 0;
+                    }
                     break;
                 }
                 default:
