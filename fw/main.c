@@ -5,10 +5,14 @@
 #include "main.h"
 #include "uart.h"
 
+/* functions */
+static int check_inputs(void);
+
 /* isr variables */
 volatile rtc_time time = { 0, 0, 0, 0, 0 };
 volatile int rx_flag = 0;
 volatile char rx_buffer[RX_BUFFER_SIZE];
+volatile clock_mode mode = TIME;
 
 int main(void)
 {
@@ -34,8 +38,6 @@ int main(void)
     /* delay before starting program */
     for (int i = 0; i < STARTUP_DELAY; i++);
 
-    clock_mode mode = TIME;
-
     while (1)
     {
         /* check incoming message */
@@ -46,19 +48,11 @@ int main(void)
             rx_flag = 0;
         }
 
-        /* check inputs */
-        if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
-        {
-            if (++mode > WAVE)
-            {
-                mode = TIME;
-            }
-            pps_flag = 1;
-            input_toggle_debug();
-        }
+        /* check button inputs */
+        int update_display = check_inputs() | (mode == WAVE);
 
         /* service 1hz pps */
-        if (pps_flag || mode == WAVE)
+        if (pps_flag || update_display)
         {
             switch(mode)
             {
@@ -85,6 +79,11 @@ int main(void)
                     }
                     break;
                 }
+                case SET:
+                {
+                    uint16_t light = i2c_light_get_als();
+                    display_write((seg *)&time, light);
+                }
                 default:
                     break;
             }
@@ -96,9 +95,112 @@ int main(void)
 }
 
 
+/* Handle button inputs */
+static int check_inputs()
+{
+    static int set_digit_idx = 0;
+    int update_display = 0;
+
+    /* INPUT 1 (X) */
+    /* Cycle mode when in TIME, TEMP, or WAVE mode */
+    /* Move digit affected in SET mode */
+    if (input_debounce(INPUT1_PIN, (int *)&input1_flag))
+    {
+        /* increase set digit index */
+        if (mode == SET)
+        {
+            set_digit_idx++;
+            if (set_digit_idx >= SEGMENT_COUNT)
+            {
+                set_digit_idx = 0;
+            }
+        }
+        /* cycle mode normally */
+        else
+        {
+            if (++mode > WAVE)
+            {
+                mode = TIME;
+            }
+        }
+
+        update_display = 1;
+    }
+
+    /* INPUT 2 (Y) */
+    /* Toggle SET mode */
+    if (input_debounce(INPUT2_PIN, (int *)&input2_flag))
+    {
+        input_toggle_debug();
+        /* enter set mode */
+        if (mode == TIME)
+        {
+            mode = SET;
+            update_display = 1;
+        }
+        /* leave set mode */
+        else if (mode == SET)
+        {
+            /* set the time to what was configured */
+            i2c_rtc_set_time(time);
+            mode = TIME;
+        }
+        else
+        {
+            /* do nothing */
+        }
+    }
+
+    uint8_t *time_ptr = (uint8_t *)&time;
+
+    /* INPUT 3 (A) */
+    /* In SET mode, increment the current digit by 1 */
+    if (input_debounce(INPUT3_PIN, (int *)&input3_flag))
+    {
+        if (mode == SET)
+        {
+            uint8_t d = time_ptr[set_digit_idx];
+            if (++d > 0x09)
+            {
+                d = 0x00;
+            }
+            time_ptr[set_digit_idx] = d;
+
+            update_display = 1;
+        }
+    }
+
+    /* INPUT 4 (B) */
+    /* In SET mode, decrement the current digit by 1 */
+    /* USED FOR RESET FOR NOW */
+    if (input_debounce(INPUT4_PIN, (int *)&input4_flag))
+    {
+        if (mode == SET)
+        {
+            uint8_t d = time_ptr[set_digit_idx];
+            if (--d > 0x09)
+            {
+                d = 0x09;
+            }
+            time_ptr[set_digit_idx] = d;
+
+            update_display = 1;
+        }
+    }
+
+    return update_display;
+}
+
+
 /* Increment current time by one second */
 void increment_time(void)
 {
+    /* ignore if in SET mode */
+    if (mode == SET)
+    {
+        return;
+    }
+
     time.seconds_ones++;
     /* check seconds */
     if (time.seconds_ones > 9)

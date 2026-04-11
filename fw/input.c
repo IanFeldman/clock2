@@ -42,20 +42,22 @@ void input_initialize(void)
     LPC_SYSCON->PINTSEL[INPUT3_IRQ] = INPUT3_PIN;
     LPC_SYSCON->PINTSEL[INPUT4_IRQ] = INPUT4_PIN;
     /* set edge sensitive */
-    LPC_PIN_INT->ISEL &= ~((1 << PPS_IRQ) | (1 << INPUT1_IRQ));
+    LPC_PIN_INT->ISEL &= ~((1 << PPS_IRQ) |
+                           (1 << INPUT1_IRQ) | (1 << INPUT2_IRQ) |
+                           (1 << INPUT3_IRQ) | (1 << INPUT4_IRQ));
     /* PPS detect rising edge */
     LPC_PIN_INT->IENR |= (1 << PPS_IRQ);
     /* MODE detect falling edge */
-    LPC_PIN_INT->IENF |= (1 << INPUT1_IRQ);
+    LPC_PIN_INT->IENF |= (1 << INPUT1_IRQ) | (1 << INPUT2_IRQ) |
+                         (1 << INPUT3_IRQ) | (1 << INPUT4_IRQ);
     /* clear any pending/leftover flags */
     LPC_PIN_INT->IST = 0xFF;
     /* enable interrupts */
     NVIC_EnableIRQ(PININT0_IRQn);
     NVIC_EnableIRQ(PININT1_IRQn);
-    /* TODO: enable remaining interrupts */
-    // NVIC_EnableIRQ(PININT2_IRQn);
-    // NVIC_EnableIRQ(PININT3_IRQn);
-    // NVIC_EnableIRQ(PININT4_IRQn);
+    NVIC_EnableIRQ(PININT2_IRQn);
+    NVIC_EnableIRQ(PININT3_IRQn);
+    NVIC_EnableIRQ(PININT4_IRQn);
 }
 
 

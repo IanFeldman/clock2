@@ -78,6 +78,7 @@ static const uint32_t seg_to_dat[] =
 
 void display_initialize(void);
 void display_write(uint8_t *segments, uint16_t brightness);
+void display_clear(void);
 void display_wave(void);
 
 #endif /* DISPLAY_H */

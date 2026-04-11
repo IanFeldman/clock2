@@ -11,7 +11,8 @@ void UART0_IRQHandler(void);
 typedef enum {
     TIME = 0,
     TEMP = 1,
-    WAVE = 2
+    WAVE = 2,
+    SET  = 3
 } clock_mode;
 
 #endif /* MAIN_H */

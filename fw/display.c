@@ -40,8 +40,7 @@ void display_initialize(void)
     /* set config: enabled as master */
     LPC_SPI0->CFG = (1 << SPI_EN) | (1 << SPI_MSTEN);
 
-    seg clear[6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
-    display_write(clear, 0x0000);
+    display_clear();
     /* set blank low */
     LPC_GPIO_PORT->CLR0 |= (1 << BLANK_PIN);
 }
@@ -93,6 +92,14 @@ void display_write(uint8_t *segments, uint16_t brightness)
     LPC_GPIO_PORT->SET0 |= (1 << XLATCH_PIN);
     display_delay();
     LPC_GPIO_PORT->CLR0 |= (1 << XLATCH_PIN);
+}
+
+
+/* Clear display */
+void display_clear(void)
+{
+    seg clear[6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
+    display_write(clear, 0x0000);
 }
 
 
